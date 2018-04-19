@@ -1,0 +1,18 @@
+{
+  "disclaimer": "Usage subject to terms: https://openexchangerates.org/terms",
+  "license": "https://openexchangerates.org/license",
+  "timestamp": 1524160800,
+  "base": "USD",
+  "rates": {
+    "AED": 3.672896,
+    "AUD": 1.293828,
+    "BTC": 0.000120910861,
+    "GBP": 0.709938,
+    "HKD": 7.84802,
+    "JPY": 107.31966667,
+    "LBP": 1510.15,
+    "QAR": 3.641514,
+    "RUB": 61.005,
+    "USD": 1
+  }
+}
