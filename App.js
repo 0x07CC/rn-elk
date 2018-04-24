@@ -21,6 +21,7 @@ import rates from './rates';
 export default class App extends React.Component {
   constructor(props) {
     super(props);
+    console.disableYellowBox = true;
 
     fx.rates = rates.rates;
     fx.base = rates.base;
@@ -113,14 +114,12 @@ export default class App extends React.Component {
             <Text>{this.state.to}</Text>
           </TouchableOpacity>
         </View>
-
-        <GestureRecognizer
+        
+        <GestureRecognizer style={styles.container}
           onSwipeLeft={this.onSwipeLeft}
           onSwipeRight={this.onSwipeRight}
         >
-          <View style={styles.container}>
-            {_.times(10, i => this.renderRow(i + 1))}
-          </View>
+          {_.times(10, i => this.renderRow(i + 1))}
         </GestureRecognizer>
       </ScrollView>
     );
