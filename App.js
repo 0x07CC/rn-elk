@@ -146,10 +146,6 @@ const styles = StyleSheet.create({
   decChart: {
     backgroundColor: '#F5FCFF',
   },
-  button: {
-    flex: 1,
-    width: '50%',
-  },
   cell: {
     flex: 1,
     width: '50%',
