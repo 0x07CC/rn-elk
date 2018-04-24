@@ -113,6 +113,7 @@ export default class App extends React.Component {
             <Text>{this.state.to}</Text>
           </TouchableOpacity>
         </View>
+
         <GestureRecognizer
           onSwipeLeft={this.onSwipeLeft}
           onSwipeRight={this.onSwipeRight}
