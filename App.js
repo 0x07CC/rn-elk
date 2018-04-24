@@ -1,6 +1,7 @@
 import React from 'react';
 
 import {
+  Platform,
   StyleSheet,
   Text,
   View,
@@ -10,74 +11,69 @@ import {
   ActionSheetIOS
 } from 'react-native';
 
-import GestureRecognizer from 'react-native-swipe-gestures';
-
-import _ from 'lodash';
 import fx from 'money';
+import _ from 'lodash';
+
+import GestureRecognizer from 'react-native-swipe-gestures';
 
 import rates from './rates';
 
 export default class App extends React.Component {
   constructor(props) {
     super(props);
-    console.disableYellowBox = true;
-    
+
     fx.rates = rates.rates;
     fx.base = rates.base;
 
     this.state = {
-      multiplier: 1,
-      expanded: -1,
       from: 'USD',
-      to: 'GBP'
+      to: 'GBP',
+      multiple: 1,
+      active: -1
     }
   }
 
-  promptCurrency = (side) => {
-    let options = Object.keys(fx.rates);
-
+  changeCurrency = (side) => {
+    let options = Object.keys(rates.rates);
+    
     ActionSheetIOS.showActionSheetWithOptions({
       options
-    }, select => 
-      this.setState({
-        [side]: options[select]
-      })
-    );
+    }, index => this.setState({
+      [side]: options[index]
+    }));
   }
 
   onSwipeLeft = () => {
-    let {multiplier} = this.state;
-    
-    if (multiplier > 1)
-      this.setState({
-        multiplier: multiplier / 10
-      });
+    let {multiple} = this.state;
+
+    this.setState({
+      multiple: multiple / 10
+    });
   }
 
   onSwipeRight = () => {
-    let {multiplier} = this.state;
-    
+    let {multiple} = this.state;
+
     this.setState({
-      multiplier: multiplier * 10
+      multiple: multiple * 10
     });
   }
 
   renderRate = (base, conv) => {
     return (
-      <View style={styles.column} key={base}>
-        <Text style={styles.cell}>{base.toFixed(2)}</Text>
-        <Text style={styles.cell}>{conv.toFixed(2)}</Text>
+      <View style={styles.row} key={base}>
+        <Text style={styles.rate}>{base.toFixed(2)}</Text>
+        <Text style={styles.rate}>{conv.toFixed(2)}</Text>
       </View>
     )
   }
 
-  renderDecimalChart = () => {
-    let base = (this.state.expanded + 1) * this.state.multiplier,
-        lBound = 0.1 * this.state.multiplier;
-    
+  renderChart = () => {
+    let base = this.state.active * this.state.multiple;
+
     return (
-      <View style={styles.decChart}>
-        {_.range(lBound, this.state.multiplier, lBound).map(d => {
+      <View style={styles.chart}>
+        {_.range(0.1 * this.state.multiple, this.state.multiple, 0.1 * this.state.multiple).map(d => {
           let conv = fx.convert(base + d, {
             from,
             to
@@ -88,45 +84,42 @@ export default class App extends React.Component {
       </View>
     )
   }
-
-  renderCell = (info, index) => {
-    let conv = fx.convert(info * this.state.multiplier, {
+  
+  renderRow = (info) => {
+    let conv = fx.convert(info * this.state.multiple, {
       from,
       to
     } = this.state);
 
     return (
-      <TouchableOpacity
-        key={index}
-        
-        onPress={() => this.setState({
-          expanded: this.state.expanded == index ? -1 : index
-        })}
-      >
-        {this.renderRate(info, conv)}
-        {this.state.expanded == index && this.renderDecimalChart()}
+      <TouchableOpacity key={info} onPress={() => this.setState({
+        active: info
+      })}>
+        {this.renderRate(info * this.state.multiple, conv)}
+        {this.state.active == info && this.renderChart()}
       </TouchableOpacity>
     )
   }
-
+  
   render() {
     return (
       <ScrollView>
-        <GestureRecognizer style={styles.container}
+        <View style={styles.row}>
+          <TouchableOpacity style={styles.rate} onPress={() => this.changeCurrency('from')}>
+            <Text>{this.state.from}</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.rate} onPress={() => this.changeCurrency('to')}>
+            <Text>{this.state.to}</Text>
+          </TouchableOpacity>
+        </View>
+        <GestureRecognizer
           onSwipeLeft={this.onSwipeLeft}
           onSwipeRight={this.onSwipeRight}
         >
-          <View style={styles.column} key={0}>
-            <TouchableOpacity style={styles.cell} onPress={() => this.promptCurrency('from')}>
-              <Text>{this.state.from}</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.cell} onPress={() => this.promptCurrency('to')}>
-              <Text>{this.state.to}</Text>
-            </TouchableOpacity>
+          <View style={styles.container}>
+            {_.times(10, i => this.renderRow(i + 1))}
           </View>
-
-          {_.times(10, i => this.renderCell((i + 1) * this.state.multiplier, i + 1))}
         </GestureRecognizer>
       </ScrollView>
     );
@@ -136,21 +129,20 @@ export default class App extends React.Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 22
   },
-  column: {
+  row: {
     flex: 1,
-    height: Dimensions.get('window').height / 10,
-    flexDirection: 'row'
+    flexDirection: 'row',
+    height: Dimensions.get('window').height / 10
   },
-  decChart: {
-    backgroundColor: '#F5FCFF',
-  },
-  cell: {
+  rate: {
     flex: 1,
     width: '50%',
     textAlign: 'center',
-    alignItems: 'center',
-    justifyContent: 'center'
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  chart: {
+    backgroundColor: '#F5F5FF'
   }
 });
